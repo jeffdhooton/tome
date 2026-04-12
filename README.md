@@ -180,7 +180,13 @@ tome/
 - **JSON output by default.** Primary user is an AI agent. `--pretty` for humans.
 - **Local-only.** No cloud, no shared state. One daemon per user.
 
-## Sibling projects
+## Part of the agent tool suite
 
-- [scry](https://github.com/jeffdhooton/scry) — code intelligence daemon. Same architecture.
-- [trawl](https://github.com/jeffdhooton/trawl) — web scraping daemon. Same stack.
+A collection of local-first, single-binary dev tools built for AI coding agents. All share the same architecture: Go, no CGO, BadgerDB, daemon over Unix socket, MCP stdio, millisecond-latency queries. Free, local-only, no cloud.
+
+| Tool | What it does | Status |
+|------|-------------|--------|
+| **[scry](https://github.com/jeffdhooton/scry)** | Code intelligence — symbols, refs, call graphs, impls, test coverage | Shipped |
+| **[flume](https://github.com/jeffdhooton/flume)** | Runtime visibility — HTTP requests, SQL queries, exceptions from dev servers | In progress |
+| **[tome](https://github.com/jeffdhooton/tome)** | Schema awareness — DB schemas, API shapes, ORM models, enums | In progress |
+| **[lore](https://github.com/jeffdhooton/lore)** | Git intelligence — blame, history, co-change patterns, hotspots | In progress |
