@@ -1,3 +1,23 @@
+---
+name: tome
+description: |
+  Database schema lookups — use instead of reading migration files or model definitions.
+  tome answers "what columns does X have", "what tables reference X", "find tables with
+  column Y", "what are the valid enum values" in one call from a pre-computed index.
+
+  TRIGGER when: user asks about table structure, columns, foreign keys, relationships,
+  enum values; or when you would otherwise read migration files, model files, or factory
+  files to understand database schema.
+
+  DO NOT use for: ORM-specific info (casts, accessors, validation), migration history,
+  API response shapes, or projects tome hasn't indexed.
+allowed-tools:
+  - Bash
+  - Read
+  - Grep
+  - Glob
+---
+
 # tome — schema awareness for AI agents
 
 ## When to use tome
