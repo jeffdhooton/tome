@@ -1,0 +1,30 @@
+version: 2
+
+builds:
+  - main: ./cmd/tome
+    binary: tome
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.Version={{ .Version }}
+    flags:
+      - -trimpath
+
+archives:
+  - format: tar.gz
+    files:
+      - CLAUDE.md
+      - docs/DECISIONS.md
+
+checksum:
+  name_template: checksums.txt
+
+release:
+  draft: true
