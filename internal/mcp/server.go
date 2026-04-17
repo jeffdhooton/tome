@@ -277,10 +277,11 @@ func (s *Server) callDaemonTool(ctx context.Context, id json.RawMessage, method 
 		}
 		args["project"] = cwd
 	}
+	project, _ := args["project"].(string)
 
 	client, err := s.dial()
 	if err != nil {
-		logCall(toolName, start, err)
+		logCall(toolName, project, 0, start, err)
 		s.writeToolError(id, "dial tome daemon: "+err.Error())
 		return
 	}
@@ -288,12 +289,12 @@ func (s *Server) callDaemonTool(ctx context.Context, id json.RawMessage, method 
 
 	var raw json.RawMessage
 	if err := client.Call(ctx, method, args, &raw); err != nil {
-		logCall(toolName, start, err)
+		logCall(toolName, project, 0, start, err)
 		s.writeToolError(id, "tome "+method+": "+err.Error())
 		return
 	}
 
-	logCall(toolName, start, nil)
+	logCall(toolName, project, extractResultCount(raw), start, nil)
 	s.writeToolResult(id, prettyJSON(raw), false)
 }
 
@@ -331,7 +332,7 @@ func mustMarshal(v any) json.RawMessage {
 }
 
 // logCall appends a line to ~/.tome/logs/mcp-calls.jsonl.
-func logCall(tool string, start time.Time, callErr error) {
+func logCall(tool, project string, results int, start time.Time, callErr error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return
@@ -348,6 +349,8 @@ func logCall(tool string, start time.Time, callErr error) {
 	entry := map[string]any{
 		"ts":         start.UTC().Format(time.RFC3339),
 		"tool":       tool,
+		"repo":       project,
+		"results":    results,
 		"latency_ms": time.Since(start).Milliseconds(),
 	}
 	if callErr != nil {
@@ -355,4 +358,28 @@ func logCall(tool string, start time.Time, callErr error) {
 	}
 	b, _ := json.Marshal(entry)
 	fmt.Fprintf(f, "%s\n", b)
+}
+
+// extractResultCount best-effort counts items returned by a tool.
+func extractResultCount(raw json.RawMessage) int {
+	if len(raw) == 0 {
+		return 0
+	}
+	var arr []json.RawMessage
+	if err := json.Unmarshal(raw, &arr); err == nil {
+		return len(arr)
+	}
+	var obj struct {
+		Total *int `json:"total"`
+		Count *int `json:"count"`
+	}
+	if err := json.Unmarshal(raw, &obj); err == nil {
+		if obj.Total != nil {
+			return *obj.Total
+		}
+		if obj.Count != nil {
+			return *obj.Count
+		}
+	}
+	return -1
 }
